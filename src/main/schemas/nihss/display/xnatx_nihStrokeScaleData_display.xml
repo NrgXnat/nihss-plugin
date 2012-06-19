@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Displays xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xdat/display.xsd" schema-element="xnatx:nihStrokeScaleData" full-description="NIHStrokeScale" brief-description="NIHStrokeScale">
+	<Arc name="PARTICIPANT_EXPERIMENT">
+		<CommonField id="PART_ID" local-field="SUBJECT_ID"/>
+		<CommonField id="DATE" local-field="DATE"/>
+		<CommonField id="EXPT_ID" local-field="EXPT_ID"/>
+	</Arc>
+	<DisplayField id="SUBJECT_ID" header="Subject" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData.subject_ID"/>
+		<HTML-Link>
+			<Property name="HREF" value="none"/>
+			<Property name="ONCLICK" value="return rpt('@Field1','xnat:subjectData','xnat:subjectData.ID');">
+				<InsertValue id="Field1" field="SUBJECT_ID"/>
+			</Property>
+		</HTML-Link>
+	</DisplayField>
+	<DisplayField id="EXPT_ID" header="ID" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData.ID"/>
+		<HTML-Link>
+			<Property name="HREF" value="none"/>
+			<Property name="ONCLICK" value="return rpt('@Field1','xnatx:nihStrokeScaleData','xnatx:nihStrokeScaleData.ID');">
+				<InsertValue id="Field1" field="EXPT_ID"/>
+			</Property>
+		</HTML-Link>
+	</DisplayField>
+	<DisplayField id="RPT" header="ID" visible="true" image="true">
+		<Content type="sql">'/@WEBAPP/images/r.gif'::text</Content>
+		<HTML-Link>
+			<Property name="HREF" value="none"/>
+			<Property name="ONCLICK" value="return rpt('@Field1','xnatx:nihStrokeScaleData','xnatx:nihStrokeScaleData.ID');">
+				<InsertValue id="Field1" field="EXPT_ID"/>
+			</Property>
+		</HTML-Link>
+	</DisplayField>
+	<DisplayField id="DATE" header="Date" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData.date"/>
+	</DisplayField>
+	<DisplayField id="AGE" header="Age" visible="true" searchable="true" data-type="integer">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData.date"/>
+		<DisplayFieldElement name="Field2" schema-element="xnat:demographicData.dob"/>
+		<DisplayFieldElement name="Field3" schema-element="xnat:demographicData.yob"/>
+		<Content type="sql">CAST(COALESCE(FLOOR(CAST((CAST(((@Field1) - (@Field2))AS FLOAT4)/365) AS numeric)),FLOOR((EXTRACT(YEAR FROM @Field1)) - (@Field3))) AS numeric)</Content>
+	</DisplayField>
+	<DisplayField header="Projects" id="PROJECTS" data-type="string">
+		<DisplayFieldElement name="Field1" viewName="XNATX_NIHSTROKESCALEDATA_PROJECTS" viewColumn="PROJECTS"/>
+	</DisplayField>
+	<DisplayField header="Label" id="LABEL" data-type="string">
+	<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData.ID"/>
+	<DisplayFieldElement name="Field2" schema-element="xnatx:nihStrokeScaleData.label"/>
+	<Content type="sql">COALESCE(@Field2, @Field1)</Content>
+		<HTML-Link>
+			<SecureLink elementName="xnatx:nihStrokeScaleData">
+				<securityMappingValue displayFieldId="PROJECTS" schemaElementMap="xnatx:nihStrokeScaleData/sharing/share/project"/>
+				<securityMappingValue displayFieldId="PROJECT" schemaElementMap="xnatx:nihStrokeScaleData/project"/>
+			</SecureLink>
+			<Property name="HREF" value="@WEBAPPapp/action/DisplayItemAction/search_value/@Field1/search_element/xnatx:nihStrokeScaleData/search_field/xnatx:nihStrokeScaleData.ID">
+				<InsertValue id="Field1" field="EXPT_ID"/>
+			</Property>
+			<Property name="ONCLICK" value="return rpt('@Field1','xnatx:nihStrokeScaleData','xnatx:nihStrokeScaleData.ID');">
+				<InsertValue id="Field1" field="EXPT_ID"/>
+			</Property>
+			<Property name="TITLE" value="Inserted: @Field1 (@Field2)">
+				<InsertValue id="Field1" field="INSERT_DATE"/>
+				<InsertValue id="Field2" field="INSERT_USER"/>
+			</Property>
+		</HTML-Link>
+	</DisplayField>
+	<DisplayField id="PROJECT" header="Project" visible="true" searchable="true" data-type="string">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData.project"/>
+	</DisplayField>
+	<DisplayField id="XNATX_NIHSTROKESCALEDATA_PROJECT_IDENTIFIER" header="ID" visible="true" searchable="false" data-type="string" xsi:type="SubQueryField">
+		<Content type="sql">xnatx_nihstrokescaledata_project_id</Content>
+		<HTML-Link>
+			<SecureLink elementName="xnatx:nihStrokeScaleData">
+				<securityMappingValue displayFieldId="PROJECTS" schemaElementMap="xnatx:nihStrokeScaleData/sharing/share/project"/>
+				<securityMappingValue displayFieldId="PROJECT" schemaElementMap="xnatx:nihStrokeScaleData/project"/>
+			</SecureLink>
+			<Property name="HREF" value="@WEBAPPapp/action/DisplayItemAction/search_value/@Field1/search_element/xnatx:nihStrokeScaleData/search_field/xnatx:nihStrokeScaleData.ID/project/@Field2">
+				<InsertValue id="Field1" field="EXPT_ID"/>
+				<InsertValue id="Field2" field="@WHERE"/>
+			</Property>
+		</HTML-Link>
+		<SubQuery>SELECT DISTINCT COALESCE(label,sharing_share_xnat_experimentda_id) AS xnatx_nihstrokescaledata_project_id,sharing_share_xnat_experimentda_id FROM (	SELECT sharing_share_xnat_experimentda_id,label FROM xnat_experimentdata_share WHERE project='@WHERE'	UNION 	SELECT id,label FROM xnat_experimentData WHERE project='@WHERE' )SEARCH</SubQuery>
+		<MappingColumns>
+			<MappingColumn schemaField="xnatx:nihStrokeScaleData.ID" queryField="sharing_share_xnat_experimentda_id"/>
+		</MappingColumns>
+	</DisplayField>
+	<DisplayField id="INSERT_DATE" header="Inserted" visible="true" searchable="true" data-type="string">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData.meta.insert_date"/>
+	</DisplayField>
+	<DisplayField id="INSERT_USER" header="Creator" visible="true" searchable="true" data-type="string">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData.meta.insert_user.login"/>
+	</DisplayField>
+	<DisplayField id="XNATX_NIHSTROKESCALEDATA_FIELD_MAP" header="Field" visible="true" searchable="false" data-type="string" xsi:type="SubQueryField">
+		<Content type="sql">field</Content>
+		<SubQuery>SELECT DISTINCT ON ( e.ID) e.ID AS expt_id,field FROM xnat_experimentData_field ef JOIN (SELECT ID,extension,element_name FROM xnat_experimentData e JOIN xdat_meta_element xme ON e.extension=xme.xdat_meta_element_id WHERE xme.element_name='xnatx:nihStrokeScaleData') e on ef.fields_field_xnat_experimentdat_id=e.id WHERE name='@WHERE'</SubQuery>
+		<MappingColumns>
+			<MappingColumn schemaField="xnatx:nihStrokeScaleData.ID" queryField="expt_id"/>
+		</MappingColumns>
+	</DisplayField>
+	<DisplayField id="TotalScore" header="Score" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1a" schema-element="xnatx:nihStrokeScaleData/Q1a" />
+		<DisplayFieldElement name="Field1b" schema-element="xnatx:nihStrokeScaleData/Q1b" />
+		<DisplayFieldElement name="Field1c" schema-element="xnatx:nihStrokeScaleData/Q1c" />
+		<DisplayFieldElement name="Field2" schema-element="xnatx:nihStrokeScaleData/Q2" />
+		<DisplayFieldElement name="Field3" schema-element="xnatx:nihStrokeScaleData/Q3" />
+		<DisplayFieldElement name="Field4" schema-element="xnatx:nihStrokeScaleData/Q4" />
+		<DisplayFieldElement name="Field5a" schema-element="xnatx:nihStrokeScaleData/Q5a" />
+		<DisplayFieldElement name="Field5b" schema-element="xnatx:nihStrokeScaleData/Q5b" />
+		<DisplayFieldElement name="Field6a" schema-element="xnatx:nihStrokeScaleData/Q6a" />
+		<DisplayFieldElement name="Field6b" schema-element="xnatx:nihStrokeScaleData/Q6b" />
+		<DisplayFieldElement name="Field7" schema-element="xnatx:nihStrokeScaleData/Q7" />
+		<DisplayFieldElement name="Field8" schema-element="xnatx:nihStrokeScaleData/Q8" />
+		<DisplayFieldElement name="Field9" schema-element="xnatx:nihStrokeScaleData/Q9" />
+		<DisplayFieldElement name="Field10" schema-element="xnatx:nihStrokeScaleData/Q10" />
+		<DisplayFieldElement name="Field11" schema-element="xnatx:nihStrokeScaleData/Q11" />
+		<Content type="sql">
+			CASE WHEN @Field1a = -1 THEN 0 ELSE COALESCE(@Field1a,0) END + 
+			CASE WHEN @Field1b = -1 THEN 0 ELSE COALESCE(@Field1b,0) END +
+			CASE WHEN @Field1c = -1 THEN 0 ELSE COALESCE(@Field1c,0) END +
+			CASE WHEN @Field2 = -1 THEN 0 ELSE COALESCE(@Field2,0) END +
+			CASE WHEN @Field3 = -1 THEN 0 ELSE COALESCE(@Field3,0) END +
+			CASE WHEN @Field4 = -1 THEN 0 ELSE COALESCE(@Field4,0) END +
+			CASE WHEN @Field5a = -1 THEN 0 ELSE COALESCE(@Field5a,0) END +
+			CASE WHEN @Field5b = -1 THEN 0 ELSE COALESCE(@Field5b,0) END +
+			CASE WHEN @Field6a = -1 THEN 0 ELSE COALESCE(@Field6a,0) END +
+			CASE WHEN @Field6b = -1 THEN 0 ELSE COALESCE(@Field6b,0) END +
+			CASE WHEN @Field7 = -1 THEN 0 ELSE COALESCE(@Field7,0) END +
+			CASE WHEN @Field8 = -1 THEN 0 ELSE COALESCE(@Field8,0) END +
+			CASE WHEN @Field9 = -1 THEN 0 ELSE COALESCE(@Field9,0) END +
+			CASE WHEN @Field10 = -1 THEN 0 ELSE COALESCE(@Field10,0) END +
+			CASE WHEN @Field11 = -1 THEN 0 ELSE COALESCE(@Field11,0) END
+		</Content>
+	</DisplayField>
+	<DisplayField id="NOTE" header="Notes" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/note"/>
+	</DisplayField>
+	<DisplayField id="Q1A" header="1a" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q1a"></DisplayFieldElement>
+		<Content type="sql">CASE @Field1 WHEN -1 THEN 'NA' WHEN 0 THEN '0' WHEN 1 THEN '1' WHEN 2 THEN '2' WHEN 3 THEN '3' WHEN 4 THEN '4' WHEN 5 THEN '5' ELSE 'Invalid' END</Content>
+	</DisplayField>
+	<DisplayField id="Q1B" header="1b" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q1b"/>
+		<Content type="sql">CASE @Field1 WHEN -1 THEN 'NA' WHEN 0 THEN '0' WHEN 1 THEN '1' WHEN 2 THEN '2' WHEN 3 THEN '3' WHEN 4 THEN '4' WHEN 5 THEN '5' ELSE 'Invalid' END</Content>
+	</DisplayField>
+	<DisplayField id="Q1C" header="1c" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q1c"/>
+		<Content type="sql">CASE @Field1 WHEN -1 THEN 'NA' WHEN 0 THEN '0' WHEN 1 THEN '1' WHEN 2 THEN '2' WHEN 3 THEN '3' WHEN 4 THEN '4' WHEN 5 THEN '5' ELSE 'Invalid' END</Content>
+	</DisplayField>
+	<DisplayField id="Q2" header="2" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q2"/>
+		<Content type="sql">CASE @Field1 WHEN -1 THEN 'NA' WHEN 0 THEN '0' WHEN 1 THEN '1' WHEN 2 THEN '2' WHEN 3 THEN '3' WHEN 4 THEN '4' WHEN 5 THEN '5' ELSE 'Invalid' END</Content>
+	</DisplayField>
+	<DisplayField id="Q3" header="3" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q3"/>
+		<Content type="sql">CASE @Field1 WHEN -1 THEN 'NA' WHEN 0 THEN '0' WHEN 1 THEN '1' WHEN 2 THEN '2' WHEN 3 THEN '3' WHEN 4 THEN '4' WHEN 5 THEN '5' ELSE 'Invalid' END</Content>
+	</DisplayField>
+	<DisplayField id="Q4" header="4" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q4"/>
+		<Content type="sql">CASE @Field1 WHEN -1 THEN 'NA' WHEN 0 THEN '0' WHEN 1 THEN '1' WHEN 2 THEN '2' WHEN 3 THEN '3' WHEN 4 THEN '4' WHEN 5 THEN '5' ELSE 'Invalid' END</Content>
+	</DisplayField>
+	<DisplayField id="Q5A" header="5a" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q5a"/>
+		<Content type="sql">CASE @Field1 WHEN -1 THEN 'NA' WHEN 0 THEN '0' WHEN 1 THEN '1' WHEN 2 THEN '2' WHEN 3 THEN '3' WHEN 4 THEN '4' WHEN 5 THEN '5' ELSE 'Invalid' END</Content>
+	</DisplayField>
+	<DisplayField id="Q5ANOTE" header="5a Note" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q5aNote"/>
+	</DisplayField>
+	<DisplayField id="Q5B" header="5b" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q5b"/>
+		<Content type="sql">CASE @Field1 WHEN -1 THEN 'NA' WHEN 0 THEN '0' WHEN 1 THEN '1' WHEN 2 THEN '2' WHEN 3 THEN '3' WHEN 4 THEN '4' WHEN 5 THEN '5' ELSE 'Invalid' END</Content>
+	</DisplayField>
+	<DisplayField id="Q5BNOTE" header="5b Note" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q5bNote"/>
+	</DisplayField>
+	<DisplayField id="Q6A" header="6a" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q6a"/>
+		<Content type="sql">CASE @Field1 WHEN -1 THEN 'NA' WHEN 0 THEN '0' WHEN 1 THEN '1' WHEN 2 THEN '2' WHEN 3 THEN '3' WHEN 4 THEN '4' WHEN 5 THEN '5' ELSE 'Invalid' END</Content>
+	</DisplayField>
+	<DisplayField id="Q6ANOTE" header="6a Note" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q6aNote"/>
+	</DisplayField>
+	<DisplayField id="Q6B" header="6b" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q6b"/>
+		<Content type="sql">CASE @Field1 WHEN -1 THEN 'NA' WHEN 0 THEN '0' WHEN 1 THEN '1' WHEN 2 THEN '2' WHEN 3 THEN '3' WHEN 4 THEN '4' WHEN 5 THEN '5' ELSE 'Invalid' END</Content>
+	</DisplayField>
+	<DisplayField id="Q6BNOTE" header="6b Note" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q6bNote"/>
+	</DisplayField>
+	<DisplayField id="Q7" header="7" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q7"/>
+		<Content type="sql">CASE @Field1 WHEN -1 THEN 'NA' WHEN 0 THEN '0' WHEN 1 THEN '1' WHEN 2 THEN '2' WHEN 3 THEN '3' WHEN 4 THEN '4' WHEN 5 THEN '5' ELSE 'Invalid' END</Content>
+	</DisplayField>
+	<DisplayField id="Q7NOTE" header="7 Note" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q7Note"/>
+	</DisplayField>
+	<DisplayField id="Q8" header="8" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q8"/>
+		<Content type="sql">CASE @Field1 WHEN -1 THEN 'NA' WHEN 0 THEN '0' WHEN 1 THEN '1' WHEN 2 THEN '2' WHEN 3 THEN '3' WHEN 4 THEN '4' WHEN 5 THEN '5' ELSE 'Invalid' END</Content>
+	</DisplayField>
+	<DisplayField id="Q9" header="9" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q9"/>
+		<Content type="sql">CASE @Field1 WHEN -1 THEN 'NA' WHEN 0 THEN '0' WHEN 1 THEN '1' WHEN 2 THEN '2' WHEN 3 THEN '3' WHEN 4 THEN '4' WHEN 5 THEN '5' ELSE 'Invalid' END</Content>
+	</DisplayField>
+	<DisplayField id="Q10" header="10" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q10"/>
+		<Content type="sql">CASE @Field1 WHEN -1 THEN 'NA' WHEN 0 THEN '0' WHEN 1 THEN '1' WHEN 2 THEN '2' WHEN 3 THEN '3' WHEN 4 THEN '4' WHEN 5 THEN '5' ELSE 'Invalid' END</Content>
+	</DisplayField>
+	<DisplayField id="Q10NOTE" header="10 Note" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q10Note"/>
+	</DisplayField>
+	<DisplayField id="Q11" header="11" visible="true" searchable="true">
+		<DisplayFieldElement name="Field1" schema-element="xnatx:nihStrokeScaleData/Q11"/>
+		<Content type="sql">CASE @Field1 WHEN -1 THEN 'NA' WHEN 0 THEN '0' WHEN 1 THEN '1' WHEN 2 THEN '2' WHEN 3 THEN '3' WHEN 4 THEN '4' WHEN 5 THEN '5' ELSE 'Invalid' END</Content>
+	</DisplayField>
+	<DisplayVersion versionName="listing" default-order-by="DATE" default-sort-order="DESC" brief-description="NIH Stroke Scale" dark-color="9999CC" light-color="CCCCFF">
+		<DisplayFieldRef id="RPT"/>
+		<DisplayFieldRef id="LABEL"/>
+		<DisplayFieldRef id="SUBJECT_LABEL" element_name="xnat:subjectData"/>
+		<DisplayFieldRef id="DATE"/>
+		<DisplayFieldRef id="GENDER" element_name="xnat:subjectData"/>
+		<DisplayFieldRef id="AGE"/>
+		<!-- <DisplayFieldRef id="NOTE"/> -->
+		<DisplayFieldRef id="TotalScore"/>
+		<DisplayFieldRef id="Q1A"/>
+		<DisplayFieldRef id="Q1B"/>
+		<DisplayFieldRef id="Q1C"/>
+		<DisplayFieldRef id="Q2"/>
+		<DisplayFieldRef id="Q3"/>
+		<DisplayFieldRef id="Q4"/>
+		<DisplayFieldRef id="Q5A"/>
+		<!-- <DisplayFieldRef id="Q5ANOTE"/> -->
+		<DisplayFieldRef id="Q5B"/>
+		<!-- <DisplayFieldRef id="Q5BNOTE"/> -->
+		<DisplayFieldRef id="Q6A"/>
+		<!-- <DisplayFieldRef id="Q6ANOTE"/> -->
+		<DisplayFieldRef id="Q6B"/>
+		<!-- <DisplayFieldRef id="Q6BNOTE"/> -->
+		<DisplayFieldRef id="Q7"/>
+		<!-- <DisplayFieldRef id="Q7NOTE"/> -->
+		<DisplayFieldRef id="Q8"/>
+		<DisplayFieldRef id="Q9"/>
+		<DisplayFieldRef id="Q10"/>
+		<!-- <DisplayFieldRef id="Q10NOTE"/> -->
+		<DisplayFieldRef id="Q11"/>
+	</DisplayVersion>
+	<DisplayVersion versionName="listing_csv" default-order-by="DATE" default-sort-order="DESC" brief-description="NIHStroleScale" dark-color="9999CC" light-color="CCCCFF">
+		<DisplayFieldRef id="LABEL"/>
+		<DisplayFieldRef id="SUBJECT_LABEL" element_name="xnat:subjectData"/>
+		<DisplayFieldRef id="DATE"/>
+		<DisplayFieldRef id="AGE"/>
+		<DisplayFieldRef id="NOTE"/>
+		<DisplayFieldRef id="TotalScore"/>
+		<DisplayFieldRef id="Q1A"/>
+		<DisplayFieldRef id="Q1B"/>
+		<DisplayFieldRef id="Q1C"/>
+		<DisplayFieldRef id="Q2"/>
+		<DisplayFieldRef id="Q3"/>
+		<DisplayFieldRef id="Q4"/>
+		<DisplayFieldRef id="Q5A"/>
+		<DisplayFieldRef id="Q5ANOTE"/>
+		<DisplayFieldRef id="Q5B"/>
+		<DisplayFieldRef id="Q5BNOTE"/>
+		<DisplayFieldRef id="Q6A"/>
+		<DisplayFieldRef id="Q6ANOTE"/>
+		<DisplayFieldRef id="Q6B"/>
+		<DisplayFieldRef id="Q6BNOTE"/>
+		<DisplayFieldRef id="Q7"/>
+		<DisplayFieldRef id="Q7NOTE"/>
+		<DisplayFieldRef id="Q8"/>
+		<DisplayFieldRef id="Q9"/>
+		<DisplayFieldRef id="Q10"/>
+		<DisplayFieldRef id="Q10NOTE"/>
+		<DisplayFieldRef id="Q11"/>
+	</DisplayVersion>
+	<DisplayVersion versionName="full" default-order-by="DATE" default-sort-order="DESC" brief-description="NIHStroleScale" dark-color="9999CC" light-color="CCCCFF">
+		<DisplayFieldRef id="EXPT_ID"/>
+		<DisplayFieldRef id="SUBJECT_LABEL" element_name="xnat:subjectData"/>
+		<DisplayFieldRef id="DATE"/>
+		<DisplayFieldRef id="AGE"/>
+		<!-- <DisplayFieldRef id="NOTE"/> -->
+		<DisplayFieldRef id="TotalScore"/>
+		<DisplayFieldRef id="Q1A"/>
+		<DisplayFieldRef id="Q1B"/>
+		<DisplayFieldRef id="Q1C"/>
+		<DisplayFieldRef id="Q2"/>
+		<DisplayFieldRef id="Q3"/>
+		<DisplayFieldRef id="Q4"/>
+		<DisplayFieldRef id="Q5A"/>
+		<!-- <DisplayFieldRef id="Q5ANOTE"/> -->
+		<DisplayFieldRef id="Q5B"/>
+		<!-- <DisplayFieldRef id="Q5BNOTE"/> -->
+		<DisplayFieldRef id="Q6A"/>
+		<!-- <DisplayFieldRef id="Q6ANOTE"/> -->
+		<DisplayFieldRef id="Q6B"/>
+		<!-- <DisplayFieldRef id="Q6BNOTE"/> -->
+		<DisplayFieldRef id="Q7"/>
+		<!-- <DisplayFieldRef id="Q7NOTE"/> -->
+		<DisplayFieldRef id="Q8"/>
+		<DisplayFieldRef id="Q9"/>
+		<DisplayFieldRef id="Q10"/>
+		<!-- <DisplayFieldRef id="Q10NOTE"/> -->
+		<DisplayFieldRef id="Q11"/>
+	</DisplayVersion>
+	<DisplayVersion versionName="detailed" default-order-by="DATE" default-sort-order="DESC" brief-description="NIHStroleScale" dark-color="9999CC" light-color="CCCCFF">
+		<DisplayFieldRef id="TotalScore"/>
+		<DisplayFieldRef id="Q1A"/>
+		<DisplayFieldRef id="Q1B"/>
+		<DisplayFieldRef id="Q1C"/>
+		<DisplayFieldRef id="Q2"/>
+		<DisplayFieldRef id="Q3"/>
+		<DisplayFieldRef id="Q4"/>
+		<DisplayFieldRef id="Q5A"/>
+		<!-- <DisplayFieldRef id="Q5ANOTE"/> -->
+		<DisplayFieldRef id="Q5B"/>
+		<!-- <DisplayFieldRef id="Q5BNOTE"/> -->
+		<DisplayFieldRef id="Q6A"/>
+		<!-- <DisplayFieldRef id="Q6ANOTE"/> -->
+		<DisplayFieldRef id="Q6B"/>
+		<!-- <DisplayFieldRef id="Q6BNOTE"/> -->
+		<DisplayFieldRef id="Q7"/>
+		<!-- <DisplayFieldRef id="Q7NOTE"/> -->
+		<DisplayFieldRef id="Q8"/>
+		<DisplayFieldRef id="Q9"/>
+		<DisplayFieldRef id="Q10"/>
+		<!-- <DisplayFieldRef id="Q10NOTE"/> -->
+		<DisplayFieldRef id="Q11"/>
+	</DisplayVersion>
+	<DisplayVersion versionName="project_bundle" default-order-by="DATE" default-sort-order="DESC" brief-description="NIH Stroke Scale" dark-color="9999CC" light-color="CCCCFF">
+		<DisplayFieldRef id="XNATX_NIHSTROKESCALEDATA_PROJECT_IDENTIFIER"/>
+		<DisplayFieldRef id="SUB_PROJECT_IDENTIFIER" element_name="xnat:subjectData"/>
+		<DisplayFieldRef id="DATE"/>
+		<DisplayFieldRef id="AGE"/>
+		<DisplayFieldRef id="TotalScore"/>
+		<!-- <DisplayFieldRef id="NOTE"/> -->
+		<DisplayFieldRef id="Q1A" description="Level of Consciousness" />
+		<DisplayFieldRef id="Q1B" description="LOC Questions" />
+		<DisplayFieldRef id="Q1C" description="LOC Commands" />
+		<DisplayFieldRef id="Q2" description="Best Gaze" />
+		<DisplayFieldRef id="Q3" description="Visual" />
+		<DisplayFieldRef id="Q4" description="Facial Palsy" />
+		<DisplayFieldRef id="Q5A" description="Motor Left Arm" />
+		<!-- <DisplayFieldRef id="Q5ANOTE"/> -->
+		<DisplayFieldRef id="Q5B" description="Motor Right Arm" />
+		<!-- <DisplayFieldRef id="Q5BNOTE"/> -->
+		<DisplayFieldRef id="Q6A" description="Motor Left Leg" />
+		<!-- <DisplayFieldRef id="Q6ANOTE"/> -->
+		<DisplayFieldRef id="Q6B" description="Motor Right Leg" />
+		<!-- <DisplayFieldRef id="Q6BNOTE"/> -->
+		<DisplayFieldRef id="Q7" description="Limb Ataxia" />
+		<!-- <DisplayFieldRef id="Q7NOTE"/> -->
+		<DisplayFieldRef id="Q8" description="Sensory" />
+		<DisplayFieldRef id="Q9" description="Best Language" />
+		<DisplayFieldRef id="Q10" description="Dysarthria" />
+		<!-- <DisplayFieldRef id="Q10NOTE"/> -->
+		<DisplayFieldRef id="Q11" description="Extinction and Inattention (formerly Neglect)" />
+	</DisplayVersion>
+	<ViewLink alias="XNATX_NIHSTROKESCALEDATA_PROJECTS">
+		<Mapping TableName="XNATX_NIHSTROKESCALEDATA_PROJECTS">
+			<MappingColumn rootElement="xnatx:nihStrokeScaleData" fieldElement="xnatx:nihStrokeScaleData.ID" mapsTo="id"/>
+		</Mapping>
+	</ViewLink>
+	<SQLView name="XNATX_NIHSTROKESCALEDATA_PROJECTS" sql="SELECT id, '&lt;' || expt.project || '&gt;' || xs_a_concat(', ' || shared.project) AS projects FROM xnat_experimentData expt LEFT JOIN xnat_experimentData_share shared ON expt.id=shared.sharing_share_xnat_experimentda_id LEFT JOIN xdat_meta_element xme ON expt.extension = xme.xdat_meta_element_id WHERE element_name='xnatx:nihStrokeScaleData' GROUP BY expt.id,expt.project"/>
+</Displays>
