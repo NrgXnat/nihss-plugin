@@ -34,7 +34,9 @@ $page.setVlinkColor($ui.vlink)
 					<TD valign="top">
 						<TABLE>
 							<TR><TD colspan=2>
-							<TABLE BORDER=1 CELLSPACING=0>
+							<style type="text/css">
+							</style>
+                            <TABLE class="report_results" BORDER=0 CELLSPACING=0>
 								<TR><TH>Instructions</TH><TH>Scale Answer</TH><TH>Score</TH></TR>
 								
 								<TR><TD width="400" valign="top">
@@ -441,9 +443,10 @@ $page.setVlinkColor($ui.vlink)
 									#set($ScoreTotal = $ScoreTotal + $!item.getIntegerProperty("xnatx:nihStrokeScaleData/Q11"))
 								#end
 								</TD></TR>
-								<TR><TD colspan=2 align="right">
+								<TR class="results_summary">
+                                    <TH colspan=2 align="right">
 								<B>Total</B>
-								</TD><TD>
+								</TH><TD>
 								<B>$ScoreTotal</B>
 								</TD></TR>
 							</TABLE>
