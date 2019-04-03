@@ -9,7 +9,7 @@
 
 buildscript {
     ext {
-        vXnat = '1.7.5-SNAPSHOT'
+        vXnat = "1.7.6-SNAPSHOT"
     }
     repositories {
         mavenLocal()
@@ -18,37 +18,37 @@ buildscript {
             url "https://plugins.gradle.org/m2/"
         }
         maven {
-            url 'https://nrgxnat.jfrog.io/nrgxnat/libs-release'
-            name 'XNAT Release Repository'
+            url "https://nrgxnat.jfrog.io/nrgxnat/libs-release"
+            name "XNAT Release Repository"
         }
         maven {
-            url 'https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot'
-            name 'XNAT Snapshot Repository'
+            url "https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot"
+            name "XNAT Snapshot Repository"
         }
     }
     dependencies {
         classpath "org.nrg.xnat.build:xnat-data-builder:${vXnat}"
-        classpath "io.spring.gradle:dependency-management-plugin:1.0.3.RELEASE"
-        classpath "gradle.plugin.com.palantir.gradle.gitversion:gradle-git-version:0.8.0"
-        classpath "io.franzbecker:gradle-lombok:1.10"
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.7.RELEASE"
+        classpath "gradle.plugin.com.palantir.gradle.gitversion:gradle-git-version:0.12.0-rc2"
+        classpath "io.franzbecker:gradle-lombok:2.1"
     }
 }
 
-group 'org.nrg.xnatx'
-version '1.0.0-SNAPSHOT'
+group "org.nrg.xnatx"
+version "1.0.0-SNAPSHOT"
 
-apply plugin: 'io.spring.dependency-management'
-apply plugin: 'io.franzbecker.gradle-lombok'
-apply plugin: 'groovy'
-apply plugin: 'java'
-apply plugin: 'application'
-apply plugin: 'maven'
-apply plugin: 'maven-publish'
-apply plugin: 'jacoco'
-apply plugin: 'idea'
-apply plugin: 'eclipse'
-apply plugin: 'xnat-data-builder'
-apply plugin: 'com.palantir.git-version'
+apply plugin: "io.spring.dependency-management"
+apply plugin: "io.franzbecker.gradle-lombok"
+apply plugin: "groovy"
+apply plugin: "java"
+apply plugin: "application"
+apply plugin: "maven"
+apply plugin: "maven-publish"
+apply plugin: "jacoco"
+apply plugin: "idea"
+apply plugin: "eclipse"
+apply plugin: "xnat-data-builder"
+apply plugin: "com.palantir.git-version"
 
 repositories {
     mavenLocal()
@@ -115,10 +115,10 @@ if (hasProperty("rt.17.jar")) {
 
 jar {
     manifest {
-        attributes 'Application-Name': 'XNAT NIH Stroke Scale Plugin',
-                'Build-Date': new Date(),
-                'Implementation-Sha': gitVersion(),
-                'Implementation-Version': version
+        attributes "Application-Name": "XNAT NIH Stroke Scale Plugin",
+                "Build-Date": new Date(),
+                "Implementation-Sha": gitVersion(),
+                "Implementation-Version": version
     }
 }
 
@@ -128,8 +128,8 @@ compileJava {
 
 configurations {
     compile.extendsFrom(compileAndInclude)
-    all*.exclude group: 'javax.sql', module: 'jdbc-stdext'
-    all*.exclude group: 'javax.transaction', module: 'jta'
+    all*.exclude group: "javax.sql", module: "jdbc-stdext"
+    all*.exclude group: "javax.transaction", module: "jta"
 }
 
 jacoco {
@@ -146,7 +146,7 @@ jacocoTestReport {
 
 task fatJar(type: Jar) {
     zip64 true
-    baseName = project.name + '-all'
+    baseName = project.name + "-all"
     from {
         configurations.compileAndInclude.collect { it.isDirectory() ? it : zipTree(it) }
     } {
@@ -163,25 +163,25 @@ publishing.publications {
 
         pom.withXml {
             def root = asNode()
-            root.appendNode('name', 'XNAT Workshop 2016 Plugin')
-            root.appendNode('url', 'https://bitbucket.org/xnatx/xnatx-nihss-plugin')
-            root.appendNode('inceptionYear', '2016')
+            root.appendNode("name", "XNAT Workshop 2016 Plugin")
+            root.appendNode("url", "https://bitbucket.org/xnatx/xnatx-nihss-plugin")
+            root.appendNode("inceptionYear", "2016")
 
-            def scm = root.appendNode('scm')
-            scm.appendNode('url', 'https://bitbucket.org/xnatx/xnatx-nihss-plugin')
-            scm.appendNode('connection', 'scm:https://bitbucket.org/xnatx/xnatx-nihss-plugin')
-            scm.appendNode('developerConnection', 'scm:git@bitbucket.org:xnatx/xnatx-nihss-plugin.git')
+            def scm = root.appendNode("scm")
+            scm.appendNode("url", "https://bitbucket.org/xnatx/xnatx-nihss-plugin")
+            scm.appendNode("connection", "scm:https://bitbucket.org/xnatx/xnatx-nihss-plugin")
+            scm.appendNode("developerConnection", "scm:git@bitbucket.org:xnatx/xnatx-nihss-plugin.git")
 
-            def license = root.appendNode('licenses').appendNode('license')
-            license.appendNode('name', 'Simplified BSD 2-Clause License')
-            license.appendNode('url', 'http://xnat.org/about/license.php')
-            license.appendNode('distribution', 'repo')
+            def license = root.appendNode("licenses").appendNode("license")
+            license.appendNode("name", "Simplified BSD 2-Clause License")
+            license.appendNode("url", "http://xnat.org/about/license.php")
+            license.appendNode("distribution", "repo")
 
-            root.appendNode('developers').with {
-                def rherrick = appendNode('developer')
-                rherrick.appendNode('id', 'rherrick')
-                rherrick.appendNode('name', 'Rick Herrick')
-                rherrick.appendNode('email', 'jrherrick@wustl.edu')
+            root.appendNode("developers").with {
+                def rherrick = appendNode("developer")
+                rherrick.appendNode("id", "rherrick")
+                rherrick.appendNode("name", "Rick Herrick")
+                rherrick.appendNode("email", "jrherrick@wustl.edu")
             }
         }
     }
@@ -192,10 +192,10 @@ publishing.repositories {
         credentials {
             // These properties must be set in the ~/.gradle/gradle.properties file or passed on the Gradle command
             // line in the form -PrepoUsername=foo -PrepoPassword=bar.
-            username propertyWithDefault('repoUsername', 'username')
-            password propertyWithDefault('repoPassword', 'password')
+            username propertyWithDefault("repoUsername", "username")
+            password propertyWithDefault("repoPassword", "password")
         }
-        if (project.version.endsWith('-SNAPSHOT')) {
+        if (project.version.endsWith("-SNAPSHOT")) {
             url "https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot-local"
         } else {
             url "https://nrgxnat.jfrog.io/nrgxnat/libs-release-local"
@@ -206,12 +206,12 @@ publishing.repositories {
 sourceSets {
     main {
         java {
-            srcDir 'src/main/java'
-            srcDir 'build/xnat-generated/src/main/java'
+            srcDir "src/main/java"
+            srcDir "build/xnat-generated/src/main/java"
         }
         resources {
-            srcDir 'src/main/resources'
-            srcDir 'build/xnat-generated/src/main/resources'
+            srcDir "src/main/resources"
+            srcDir "build/xnat-generated/src/main/resources"
         }
     }
 }
