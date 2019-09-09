@@ -102,10 +102,10 @@ if (hasProperty("rt.17.jar")) {
     def rt17jar = property "rt.17.jar"
     logger.info "Using ${rt17jar} as the bootstrap class path jar."
     gradle.projectsEvaluated {
-        tasks.withType(JavaCompile) { task ->
-            task.options.fork = true
-            task.options.compilerArgs << "-XDignore.symbol.file"
-            task.options.bootClasspath = rt17jar
+        tasks.withType(JavaCompile) {
+            options.fork = true
+            options.compilerArgs << "-XDignore.symbol.file"
+            options.bootstrapClasspath = files(rt17jar as String)
         }
     }
 } else {
