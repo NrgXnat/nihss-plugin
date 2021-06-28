@@ -9,65 +9,33 @@
 
 buildscript {
     ext {
-        vXnat = "1.8.1-SNAPSHOT"
+        vXnat = "1.8.1"
     }
-    repositories {
-        mavenLocal()
-        jcenter()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-        maven {
-            url "https://nrgxnat.jfrog.io/nrgxnat/libs-release"
-            name "XNAT Release Repository"
-        }
-        maven {
-            url "https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot"
-            name "XNAT Snapshot Repository"
-        }
-    }
-    dependencies {
-        classpath "org.nrg.xnat.build:xnat-data-builder:${vXnat}"
-        classpath "io.spring.gradle:dependency-management-plugin:1.0.7.RELEASE"
-        classpath "gradle.plugin.com.palantir.gradle.gitversion:gradle-git-version:0.12.0-rc2"
-        classpath "io.franzbecker:gradle-lombok:2.1"
-    }
+}
+
+plugins {
+    id "eclipse"
+    id "idea"
+    id "jacoco"
+    id "java"
+    id "maven-publish"
+    id "com.dorongold.task-tree" version "1.5"
+    id "com.palantir.git-version" version "0.12.1"
+    id "io.franzbecker.gradle-lombok" version "4.0.0"
+    id "io.spring.dependency-management" version "1.0.11.RELEASE"
+    id "net.linguica.maven-settings" version "0.5"
+    id "org.nrg.xnat.build.xnat-data-builder" version "${vXnat}"
 }
 
 group "org.nrg.xnatx"
 version "1.1.1-SNAPSHOT"
-
 description = "An implementation of the NIH stroke scale for XNAT."
-
-apply plugin: "io.spring.dependency-management"
-apply plugin: "io.franzbecker.gradle-lombok"
-apply plugin: "groovy"
-apply plugin: "java"
-apply plugin: "application"
-apply plugin: "maven"
-apply plugin: "maven-publish"
-apply plugin: "jacoco"
-apply plugin: "idea"
-apply plugin: "eclipse"
-apply plugin: "xnat-data-builder"
-apply plugin: "com.palantir.git-version"
 
 repositories {
     mavenLocal()
-    maven {
-        url "http://maven.imagej.net/content/groups/public"
-        name "ImageJ Maven Repository"
-    }
-    jcenter()
+    maven { url "https://nrgxnat.jfrog.io/nrgxnat/libs-release" }
+    maven { url "https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot" }
     mavenCentral()
-    maven {
-        url "https://nrgxnat.jfrog.io/nrgxnat/libs-release"
-        name "XNAT Release Repository"
-    }
-    maven {
-        url "https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot"
-        name "XNAT Snapshot Repository"
-    }
 }
 
 sourceCompatibility = 1.8
@@ -108,9 +76,9 @@ compileJava {
 }
 
 configurations {
-    compile.extendsFrom(compileAndInclude)
     all*.exclude group: "javax.sql", module: "jdbc-stdext"
     all*.exclude group: "javax.transaction", module: "jta"
+    implementation.extendsFrom(implementAndInclude)
 }
 
 jacoco {
@@ -125,11 +93,108 @@ jacocoTestReport {
     }
 }
 
-task fatJar(type: Jar) {
+sourceSets {
+    main {
+        java {
+            srcDir "build/xnat-generated/src/main/java"
+        }
+        resources {
+            srcDir "build/xnat-generated/src/main/resources"
+        }
+    }
+}
+
+// Pulls in the Jenkins BUILD_NUMBER environment variable if available.
+def buildDate = new Date()
+def buildNumber = System.getenv().BUILD_NUMBER?.toInteger() ?: "Manual"
+def isDirty, branchName, gitHash, gitHashFull, commitDistance, lastTag, isCleanTag
+
+try {
+    def gitDetails = versionDetails()
+    isDirty = gitVersion().endsWith ".dirty"
+    branchName = gitDetails.branchName ?: "Unknown"
+    gitHash = gitDetails.gitHash
+    gitHashFull = gitDetails.gitHashFull
+    commitDistance = gitDetails.commitDistance
+    lastTag = gitDetails.lastTag
+    isCleanTag = gitDetails.isCleanTag
+} catch (IllegalArgumentException e) {
+    logger.info "Got an error trying to read VCS metadata from git. It's possible this project is not under VCS control. Using placeholder values for manifest entries."
+    isDirty = true
+    branchName = "Unknown"
+    gitHash = "None"
+    gitHashFull = "None"
+    commitDistance = 0
+    lastTag = "None"
+    isCleanTag = false
+}
+
+ext.gitManifest = manifest {
+    attributes "Application-Name": project.description,
+            "Build-Date": buildDate,
+            "Build-Number": buildNumber,
+            "Implementation-Version": project.version,
+            "Implementation-Sha": gitHash,
+            "Implementation-Sha-Full": gitHashFull,
+            "Implementation-Commit": commitDistance,
+            "Implementation-LastTag": lastTag,
+            "Implementation-Branch": branchName,
+            "Implementation-CleanTag": isCleanTag,
+            "Implementation-Dirty": isDirty
+}
+
+logger.info """
+Building artifacts with manifest attributes:
+
+ * Build-Date:              ${buildDate}
+ * Build-Number:            ${buildNumber}
+ * Implementation-Version:  ${version}
+ * Implementation-Sha-Full: ${gitHashFull}
+ * Implementation-Sha:      ${gitHash}
+ * Implementation-Commit:   ${commitDistance}
+ * Implementation-LastTag:  ${lastTag}
+ * Implementation-Branch:   ${branchName}
+ * Implementation-CleanTag: ${isCleanTag}
+ * Implementation-Dirty:    ${isDirty}
+"""
+
+task sourceJar(type: Jar, dependsOn: classes) {
+    classifier "sources"
+    manifest {
+        from gitManifest
+    }
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar) {
+    classifier "javadoc"
+    manifest {
+        from gitManifest
+    }
+    from javadoc.destinationDir
+}
+
+jar {
+    dependsOn test, sourceJar, javadocJar
+    enabled = true
+    manifest {
+        from gitManifest
+    }
+}
+
+task xnatPluginJar(type: Jar) {
+    dependsOn test, sourceJar, javadocJar
     zip64 true
-    baseName = project.name + "-all"
+    archiveClassifier.set "xpl"
+    manifest {
+        from gitManifest
+    }
+    // files and folders with "-dev" or "--xx" in their name
+    // will not be in the compiled jar
+    exclude "**/resources/**/*-dev**"
+    exclude "**/resources/**/*--xx**"
     from {
-        configurations.compileAndInclude.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.implementAndInclude.collect { it.isDirectory() ? it : zipTree(it) }
     } {
         exclude "META-INF/*.SF"
         exclude "META-INF/*.DSA"
@@ -138,61 +203,46 @@ task fatJar(type: Jar) {
     with jar
 }
 
-publishing.publications {
-    mavenJava(MavenPublication) {
-        from components.java
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifacts {
+                artifact sourceJar
+                artifact javadocJar
+                artifact xnatPluginJar
+            }
 
-        pom.withXml {
-            def root = asNode()
-            root.appendNode("name", "XNAT Workshop 2016 Plugin")
-            root.appendNode("url", "https://bitbucket.org/xnatx/xnatx-nihss-plugin")
-            root.appendNode("inceptionYear", "2016")
+            pom.withXml {
+                def root = asNode()
+                root.appendNode("name", "XNAT Workshop 2016 Plugin")
+                root.appendNode("url", "https://bitbucket.org/xnatx/xnatx-nihss-plugin")
+                root.appendNode("inceptionYear", "2016")
 
-            def scm = root.appendNode("scm")
-            scm.appendNode("url", "https://bitbucket.org/xnatx/xnatx-nihss-plugin")
-            scm.appendNode("connection", "scm:https://bitbucket.org/xnatx/xnatx-nihss-plugin")
-            scm.appendNode("developerConnection", "scm:git@bitbucket.org:xnatx/xnatx-nihss-plugin.git")
+                def scm = root.appendNode("scm")
+                scm.appendNode("url", "https://bitbucket.org/xnatx/xnatx-nihss-plugin")
+                scm.appendNode("connection", "scm:https://bitbucket.org/xnatx/xnatx-nihss-plugin")
+                scm.appendNode("developerConnection", "scm:git@bitbucket.org:xnatx/xnatx-nihss-plugin.git")
 
-            def license = root.appendNode("licenses").appendNode("license")
-            license.appendNode("name", "Simplified BSD 2-Clause License")
-            license.appendNode("url", "http://xnat.org/about/license.php")
-            license.appendNode("distribution", "repo")
+                def license = root.appendNode("licenses").appendNode("license")
+                license.appendNode("name", "Simplified BSD 2-Clause License")
+                license.appendNode("url", "http://xnat.org/about/license.php")
+                license.appendNode("distribution", "repo")
 
-            root.appendNode("developers").with {
-                def rherrick = appendNode("developer")
-                rherrick.appendNode("id", "rherrick")
-                rherrick.appendNode("name", "Rick Herrick")
-                rherrick.appendNode("email", "jrherrick@wustl.edu")
+                root.appendNode("developers").with {
+                    def rherrick = appendNode("developer")
+                    rherrick.appendNode("id", "rherrick")
+                    rherrick.appendNode("name", "Rick Herrick")
+                    rherrick.appendNode("email", "jrherrick@wustl.edu")
+                }
             }
         }
     }
-}
 
-publishing.repositories {
-    maven {
-        credentials {
-            // These properties must be set in the ~/.gradle/gradle.properties file or passed on the Gradle command
-            // line in the form -PrepoUsername=foo -PrepoPassword=bar.
-            username propertyWithDefault("repoUsername", "username")
-            password propertyWithDefault("repoPassword", "password")
-        }
-        if (project.version.endsWith("-SNAPSHOT")) {
-            url "https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot-local"
-        } else {
-            url "https://nrgxnat.jfrog.io/nrgxnat/libs-release-local"
-        }
-    }
-}
-
-sourceSets {
-    main {
-        java {
-            srcDir "src/main/java"
-            srcDir "build/xnat-generated/src/main/java"
-        }
-        resources {
-            srcDir "src/main/resources"
-            srcDir "build/xnat-generated/src/main/resources"
+    repositories {
+        maven {
+            url project.version.endsWith("-SNAPSHOT") ? "https://nrgxnat.jfrog.io/nrgxnat/libs-snapshot-local" : "https://nrgxnat.jfrog.io/nrgxnat/libs-release-local"
+            // The value for name must match <id> in ~/.m2/settings.xml
+            name = "XNAT_Artifactory"
         }
     }
 }
