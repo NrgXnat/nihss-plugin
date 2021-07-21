@@ -1,7 +1,7 @@
 /*
  * xnatx-nihss-plugin: build.gradle
  * XNAT http://www.xnat.org
- * Copyright (c) 2017, Washington University School of Medicine
+ * Copyright (c) 2017-2021, Washington University School of Medicine
  * All Rights Reserved
  *
  * Released under the Simplified BSD.
@@ -9,7 +9,7 @@
 
 buildscript {
     ext {
-        vXnat = "1.8.1"
+        vXnat = "1.8.3-SNAPSHOT"
     }
 }
 
@@ -38,8 +38,8 @@ repositories {
     mavenCentral()
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencyManagement.imports {
     mavenBom "org.nrg:parent:${vXnat}"
@@ -72,6 +72,7 @@ jar {
 }
 
 compileJava {
+    dependsOn xnatDataBuilder
     options.fork = false
 }
 
