@@ -10,14 +10,18 @@ To build the plugin:
 
 1. Build the plugin:
 
-    `./gradlew clean jar` 
+    `./gradlew clean xnatPluginJar` 
     
     On Windows, you can use the batch file:
     
     `gradlew.bat clean jar`
     
-    This should build the plugin in the file **build/libs/xnatx-nihss-plugin-1.1.0.jar** 
-    (the version may differ based on updates to the code).
+    This should build the plugin in the file **build/libs/xnatx-nihss-plugin-1.1.1.jar** 
+    (the version may differ based on updates to the code). 
+    
+    **Troubleshooting:** If you get Gradle errors attempting to build the datatype, try this build command: 
+    
+    `./gradlew xnatDataBuilder xnatPluginJar`
     
 
 # Deploying #
