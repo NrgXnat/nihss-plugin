@@ -10,3 +10,4 @@
 /ide-bin
 /out
 dep*.txt
+/gradle.properties

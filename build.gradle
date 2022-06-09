@@ -9,7 +9,7 @@
 
 buildscript {
     ext {
-        vXnat = "1.8.3-SNAPSHOT"
+        vXnat = "1.8.5-SNAPSHOT"
     }
 }
 
@@ -21,7 +21,7 @@ plugins {
     id "maven-publish"
     id "com.dorongold.task-tree" version "1.5"
     id "com.palantir.git-version" version "0.12.1"
-    id "io.franzbecker.gradle-lombok" version "4.0.0"
+    id "io.franzbecker.gradle-lombok" version "5.0.0"
     id "io.spring.dependency-management" version "1.0.11.RELEASE"
     id "net.linguica.maven-settings" version "0.5"
     id "org.nrg.xnat.build.xnat-data-builder" version "${vXnat}"
@@ -67,7 +67,7 @@ jar {
         attributes "Application-Name": "XNAT NIH Stroke Scale Plugin",
                 "Build-Date": new Date(),
                 "Implementation-Sha": gitVersion(),
-                "Implementation-Version": version
+                "Implementation-Version": project.version
     }
 }
 
@@ -88,9 +88,9 @@ jacoco {
 
 jacocoTestReport {
     reports {
-        xml.enabled = false
-        csv.enabled = false
-        html.destination file("${buildDir}/jacocoHtml")
+        xml.required = false
+        csv.required = false
+        html.required = true
     }
 }
 
