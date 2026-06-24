@@ -21,7 +21,7 @@ buildscript {
         // xnat-data-builder needs core XNAT schemas (xnat.xsd) on its classpath to resolve
         // xs:import in plugin-local schemas (nihss/nihss.xsd). xnat-web bundles the core schemas
         // in monorepo 1.10+ (xnat-data-models artifact is unmaintained on JFrog).
-        classpath "org.nrg.xnat:web:${vXnat}"
+        classpath("org.nrg.xnat:web:${vXnat}") { transitive = false }
     }
 }
 
